@@ -13,26 +13,89 @@
             </a>
         <% } %>
         <% if (!error) { %>
-            <table class="table">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Descripción</th>
-                    <th scope="col">Acción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th scope="row"><%= mascota.id %> </th>
-                        <td><%= mascota.nombre %></td>
-                        <td><%= mascota.descripcion %></td>
-                        <td>@mdo</td>
-                    </tr>
-                </tbody>
-            </table>
+            <form id="formularioEditar" data-id="<%= mascota.id %> ">
+                <input 
+                    type="text"
+                    class="form-control my-2"
+                    name="nombre"
+                    id="nombreInput"
+                    value="<%= mascota.nombre %>"
+                >
+                <input 
+                    type="text"
+                    class="form-control my-2"
+                    name="descripcion"
+                    id="descripcionInput"
+                    value="<%= mascota.descripcion %>"
+                >
+                <button
+                    class="btn btn-warning btn-block"
+                    type="submit"
+                >
+                    Editar
+                </button>
+            </form>
+            <hr>
+            <button 
+                id="btnEliminar"
+                class="btn btn-danger btn-sm mt-5"
+                data-id="<%= mascota.id %> "
+            >
+                Eliminar
+            </button>
         <% } %>
     </div>
     
 
 <%- include("template/footer") %>
+
+<script>
+    const btnEliminar = document.querySelector('#btnEliminar')
+    
+    btnEliminar.addEventListener('click', async() =>{
+        //console.log("Me diste Click");
+        const id = btnEliminar.dataset.id
+        try {
+            const data  = await fetch(`/mascotas/${id}` , {
+                method: 'delete'
+            })
+            const res = await data.json() 
+            if (res.estado) {
+                window.location.href = '/mascotas'
+            } else {
+                console.log(res);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    })
+
+    const formularioEditar = document.querySelector('#formularioEditar')
+
+    formularioEditar.addEventListener('submit', async(e) => {
+        e.preventDefault()
+        
+        const nombre = formularioEditar.elements['nombre'].value
+        const descripcion = document.querySelector('#descripcionInput').value
+        const id = formularioEditar.dataset.id
+
+        try {
+            const data  = await fetch(`/mascotas/${id}` , {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                }, 
+                body: JSON.stringify({nombre, descripcion})
+            })
+            const res = await data.json()
+            if(res.estado){
+                window.location.href = '/mascotas'
+            }else{
+                console.log(res)
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    })
+</script>
